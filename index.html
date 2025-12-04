@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SmartBand — Dashboard</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <script src="https://kit.fontawesome.com/9c9b6c8a3b.js" crossorigin="anonymous"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+  --bg:#fde7f0;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --text:#3a003a;
+  --accent:#ff6fa8;
+  --danger:#d92d46;
+  --shadow:0 8px 28px rgba(255,105,180,0.20);
+  --radius:14px;
+}
+
+*{box-sizing:border-box;font-family:Inter,ui-sans-serif;margin:0;padding:0}
+body{background:var(--bg);color:var(--text)}
+
+.app{max-width:1200px;margin:20px auto;padding:16px}
+
+/* Top Bar */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+
+.logo{
+  width:48px;height:48px;border-radius:12px;
+  background:linear-gradient(135deg,#ff8fc4,#ff6fa8);
+  color:#fff;font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.brand{display:flex;gap:12px;align-items:center}
+.title{font-weight:700;font-size:20px}
+.subtitle{font-size:12px;color:var(--muted)}
+
+.last-seen{font-size:12px;color:var(--muted)}
+
+.btn{
+  padding:8px 14px;
+  border-radius:10px;
+  border:0;
+  cursor:pointer;
+  font-weight:600;
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.btn-danger{
+  background:linear-gradient(90deg,#ff4578,#d92d46);
+  color:white;
+}
+
+.btn-ghost{
+  background:transparent;
+  border:1px solid #ffd3e4;
+  color:var(--text);
+}
+
+/* GRID */
+.main-grid{
+  display:grid;
+  grid-template-columns:330px 1fr;
+  gap:18px;
+}
+
+/* Cards */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* KPIs */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.kpi-icon{
+  width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:10px;
+  background:#ffe0ec;
+  color:#ff4880;
+}
+
+.kpi-head{display:flex;align-items:center;gap:10px}
+.kpi-title{font-size:13px;color:var(--muted);font-weight:600}
+
+.kpi-value{
+  font-size:24px;
+  font-weight:700;
+  color:var(--text);
+}
+.kpi-value.small{font-size:14px}
+
+.unit{font-size:12px;color:var(--muted)}
+
+.kpi-sub{font-size:11px;color:var(--muted)}
+
+/* Alerts */
+.alerts-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto}
+.alert-empty{text-align:center;color:var(--muted);font-size:13px}
+
+.alert{
+  padding:10px;
+  border-radius:12px;
+  font-size:13px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.alert.warning{
+  background:#fff5e8;
+  border:1px solid #f9c27b;
+}
+
+.alert.critical{
+  background:#ffe5ea;
+  border:1px solid #ff97a8;
+}
+
+/* Chart */
+.chart-card{
+  height:300px;
+}
+
+.map-placeholder{
+  height:200px;
+  border-radius:12px;
+  border:2px dashed #ffbcd4;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+}
+
+/* Responsive */
+@media (max-width:900px){
+  .main-grid{grid-template-columns:1fr}
+}
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">💗</div>
+        <div class="brand-text">
+          <div class="title">SmartBand</div>
+          <div class="subtitle">Health & Safety Dashboard</div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div id="lastSeen" class="last-seen">Last update: --</div>
+        <button id="btnAlert" class="btn btn-danger"><i class="fas fa-bell"></i> Emergency</button>
+      </div>
+    </header>
+
+    <main class="main-grid">
+
+      <aside class="left-col">
+        <div class="kpi-grid">
+
+          <div class="kpi card">
+            <div class="kpi-head">
+              <div class="kpi-icon"><i class="fas fa-heart"></i></div>
+              <div class="kpi-title">Heart Rate</div>
+            </div>
+            <div id="hr" class="kpi-value">-- <span class="unit">bpm</span></div>
+            <div class="kpi-sub">SpO₂: <span id="spo2">--</span>%</div>
+          </div>
+
+          <div class="kpi card">
+            <div class="kpi-head">
+              <div class="kpi-icon"><i class="fas fa-bolt"></i></div>
+              <div class="kpi-title">Stress</div>
+            </div>
+            <div id="stress" class="kpi-value">-- <span class="unit">%</span></div>
+            <div class="kpi-sub">Stress level indicator</div>
+          </div>
+
+          <div class="kpi card">
+            <div class="kpi-head">
+              <div class="kpi-icon"><i class="fas fa-thermometer-half"></i></div>
+              <div class="kpi-title">Temperature</div>
+            </div>
+            <div id="temp" class="kpi-value">-- <span class="unit">°C</span></div>
+            <div class="kpi-sub">Body surface temp</div>
+          </div>
+
+          <div class="kpi card">
+            <div class="kpi-head">
+              <div class="kpi-icon"><i class="fas fa-map-marker-alt"></i></div>
+              <div class="kpi-title">Location</div>
+            </div>
+            <div id="loc" class="kpi-value small">--</div>
+            <div class="kpi-sub">GPS</div>
+          </div>
+
+        </div>
+
+        <div class="alerts card">
+          <div class="alerts-header">
+            <div class="alerts-title">Alerts</div>
+            <button id="btnMute" class="btn btn-ghost"><i class="fas fa-broom"></i> Clear</button>
+          </div>
+          <div id="alertsList" class="alerts-list">
+            <div class="alert-empty">No alerts</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="right-col">
+
+        <div class="card chart-card">
+          <div class="card-title">Heart Rate Trend</div>
+          <canvas id="hrChart" height="160"></canvas>
+        </div>
+
+        <div class="card map-card">
+          <div class="card-title">Location Overview</div>
+          <div class="map-wrapper">
+            <div class="map-placeholder">
+              <div class="map-coords">Lat: <span id="lat">0.0000</span> | Lon: <span id="lon">0.0000</span></div>
+              <div class="map-caption">Map placeholder</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
